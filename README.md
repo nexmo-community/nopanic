@@ -44,7 +44,7 @@ npm run lint
 
 # Configuring Firebase
 
-After you create your project in Firebase you need to enable authentication, aatabase, functions and optionally hosting.
+After you create your project in Firebase you need to enable authentication, database and optionally hosting.
 
 ## Adding your app to Firebase
 
@@ -61,10 +61,6 @@ After you create your project in Firebase you need to enable authentication, aat
 ### Database
 
 - Go to Database and click on start to use the service
-
-### Functions
-
-- You may do as with previous services to enable it or it will get enabled when using the Firebase CLI
 
 ### Hosting
 
@@ -87,23 +83,6 @@ firebase login
 ```
 
 ## Deployment
-
-### Deploy the function in Firebase Cloud Functions
-
-The function for this app is in `./functions/nopanic/main.py
-
-- Login in Firebase with the CLI
-- Setup the variables for Vonage. Run the command
-
-```
-firebase functions:config:set twilio.sid="ACCOUNT_SID" twilio.token="AUTH_TOKEN" twilio.number="PHONE_NUMBER"
-```
-
-- Then you need to deploy the function using
-
-```
-firebase deploy --only functions
-```
 
 ### Deploy the application using Firebase hosting
 
