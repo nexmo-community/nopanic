@@ -1,0 +1,3 @@
+Flask
+nexmo
+firebase-admin
