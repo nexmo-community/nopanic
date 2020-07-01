@@ -47,9 +47,7 @@
       <!-- end of menu -->
 
       <!-- Title of the Navbar -->
-      <v-toolbar-title class="headline white--text"
-        >No Panic</v-toolbar-title
-      >
+      <v-toolbar-title class="headline white--text">No Panic</v-toolbar-title>
     </v-toolbar>
   </div>
 </template>

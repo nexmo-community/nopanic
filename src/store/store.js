@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import firebase from '@/utils/firebase'
+import { publishNotification } from '@/utils/storeHelpers.js'
 
 // importing modules
 import * as notification from '@/store/modules/notification.js'
@@ -8,17 +9,6 @@ import * as user from '@/store/modules/user.js'
 import * as adminUsers from '@/store/modules/adminUsers.js'
 
 Vue.use(Vuex)
-
-/**
- *
- * @param {*} type Type of the Notification
- * @param {*} message Message to display as Notification
- * @param {*} dispatch Dispatch object of Vuex
- */
-const publishNotification = (type, message, dispatch) => {
-  const notification = { type, message }
-  dispatch('notification/add', notification, { root: true })
-}
 
 export default new Vuex.Store({
   modules: {
@@ -31,7 +21,8 @@ export default new Vuex.Store({
       lat: null,
       lng: null
     },
-    positionAccuracy: 0
+    positionAccuracy: 0,
+    isFetchingUser: false
   },
   mutations: {
     SET_LOCATION(state, coor) {
@@ -39,9 +30,15 @@ export default new Vuex.Store({
       state.coordinates = { lat: coor.latitude, lng: coor.longitude }
       // setting the accuracy of the position
       state.positionAccuracy = coor.accuracy
+    },
+    SET_FETCHING_USER(state, flag) {
+      state.isFetchingUser = flag
     }
   },
   actions: {
+    setFetchingUser({ commit }, flag) {
+      commit('SET_FETCHING_USER', flag)
+    },
     getCurrentLocation({ commit, dispatch }) {
       if (navigator.geolocation) {
         // gettingt the position using the HTML5 API
@@ -59,7 +56,7 @@ export default new Vuex.Store({
     },
     sendPanicSMS({ state, dispatch }) {
       // accesing the Cloud Function
-      const sendSMS = firebase.functions().httpsCallable('send_sms')
+      const sendSMS = firebase.functions().httpsCallable('sendSMS')
 
       // get the contacts
       const contacts = state.user.contacts
@@ -70,7 +67,7 @@ export default new Vuex.Store({
       // add corrdinates to message
       let reg = /<LOCATION>/gi
       let message =
-        `FROM: ${user.displayName}. ` +
+        `FROM: ${user.name}. ` +
         customMessage.replace(
           reg,
           `https://maps.google.com/maps?q=${coor.lat},${coor.lng}`
@@ -107,4 +104,3 @@ export default new Vuex.Store({
     }
   }
 })
-

@@ -26,55 +26,44 @@
 </style>
 
 <script>
-import firebase from "@/utils/firebase";
-import store from "@/store/store";
-import { mapState } from "vuex";
-import NotificationContainer from "@/components/NotificationContainer.vue";
-
-/**
- * Observer waiting for the user get obtained from Firebase SDK
- * if the user is logged in and the token is not expired
- */
-firebase.auth().onAuthStateChanged(function(user) {
-  if (user) {
-    // if the user is obtained, then converting it to JSON
-    const jsonUser = user.toJSON();
-    // dispatching the log in
-    store.dispatch("user/signInWithUserAndToken", {
-      user: jsonUser,
-      token: jsonUser.stsTokenManager.accessToken
-    });
-    // getting the user information from DB
-    store.dispatch("user/fetchOrCreateUser");
-  }
-});
+import { mapState } from 'vuex'
+import NotificationContainer from '@/components/NotificationContainer.vue'
 
 export default {
-  name: "App",
+  name: 'App',
   components: {
-    NotificationContainer
+    NotificationContainer,
+  },
+  mounted() {
+    if (this.isLogged) {
+      if (!this.isFetchingUser) {
+        // get the user information or create a new user if doesn't exists
+        this.$store.dispatch('user/fetchOrCreateUser')
+      }
+    }
   },
   data() {
     return {
-      updateLocation: null
-    };
+      updateLocation: null,
+    }
   },
   computed: {
     ...mapState({
-      isLogged: state => state.user.isLogged
-    })
+      isLogged: (state) => state.user.isLogged,
+      isFetchingUser: (state) => state.isFetchingUser,
+    }),
   },
   watch: {
-    isLogged: function(newVal) {
+    isLogged: function (newVal) {
       // observing the changes in isLogged in order to
       // change of view, to home or sig in
-      console.log(`isLogged: ${newVal}`);
+      console.log(`isLogged: ${newVal}`)
       if (newVal) {
-        this.$router.push({ name: "home" });
+        this.$router.push({ name: 'home' })
       } else {
-        this.$router.push({ name: "signin" });
+        this.$router.push({ name: 'signin' })
       }
-    }
-  }
-};
+    },
+  },
+}
 </script>

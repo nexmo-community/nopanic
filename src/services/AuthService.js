@@ -1,110 +1,117 @@
-import firebase from '@/utils/firebase'
+import auth0 from 'auth0-js'
+import Vue from 'vue'
 
-const Auth = firebase.auth()
-const db = firebase.firestore()
+const AUTH0_DOMAIN = process.env.VUE_APP_AUTH0_DOMAIN
+const CLIENT_ID = process.env.VUE_APP_AUTH0_CLIENT_ID
+const URL = process.env.VUE_APP_AUTH0_APP_URL
+
+const webAuth = new auth0.WebAuth({
+  domain: AUTH0_DOMAIN,
+  clientID: CLIENT_ID,
+  redirectUri: `${URL}callback`,
+  // we will use the api/v2/ to access the user information as payload
+  audience: 'https://' + AUTH0_DOMAIN + '/api/v2/',
+  responseType: 'token id_token',
+  scope: 'openid profile email'
+})
+
+const auth = new Vue({
+  computed: {
+    token: {
+      // returns the token from local storage
+      get: function() {
+        return localStorage.getItem('id_token')
+      },
+      // set the token in local storage
+      set: function(id_token) {
+        localStorage.setItem('id_token', id_token)
+      }
+    },
+    accessToken: {
+      // get access token from local storage
+      get: function() {
+        return localStorage.getItem('access_token')
+      },
+      // set access token in local storage
+      set: function(accessToken) {
+        return localStorage.setItem('access_token', accessToken)
+      }
+    },
+    expiresAt: {
+      // get expiration from local storage
+      get: function() {
+        return localStorage.getItem('expires_at')
+      },
+      // set expiration in local storage
+      set: function(expiresIn) {
+        let expiresAt = JSON.stringify(expiresIn * 1000 + new Date().getTime())
+        localStorage.setItem('expires_at', expiresAt)
+      }
+    },
+    user: {
+      // get user from local storage
+      get: function() {
+        return JSON.parse(localStorage.getItem('user'))
+      },
+      // set user in local storage
+      set: function(user) {
+        localStorage.setItem('user', JSON.stringify(user))
+      }
+    }
+  },
+  methods: {
+    // Starts the user login flow
+    login() {
+      webAuth.authorize()
+    },
+    logout() {
+      // eslint-disable-next-line no-unused-vars
+      return new Promise((resolve, reject) => {
+        // cleaning variables in local storage
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('id_token')
+        localStorage.removeItem('expires_at')
+        localStorage.removeItem('user')
+
+        webAuth.logout({
+          returnTo: `${URL}`,
+          clientID: CLIENT_ID
+        })
+
+        resolve()
+      })
+    },
+    isAuthenticated() {
+      return new Date().getTime() < this.expiresAt
+    },
+    // Handles the callback request from Auth0
+    handleAuthentication() {
+      return new Promise((resolve, reject) => {
+        webAuth.parseHash((err, authResult) => {
+          if (err) {
+            this.logout()
+            reject(err)
+          }
+
+          if (authResult && authResult.accessToken && authResult.idToken) {
+            this.expiresAt = authResult.expiresIn
+            this.accessToken = authResult.accessToken
+            this.token = authResult.idToken
+            this.user = authResult.idTokenPayload
+
+            resolve({
+              user: this.user,
+              token: this.token
+            })
+          }
+        })
+      })
+    }
+  }
+})
 
 export default {
-  /**
-   * Calls the signInWithRedirect() Firebase Auth method to start the OAuth Flow
-   * @return "{ user, token }" An object with the user and access token
-   */
-  async signInWithGoogle() {
-    // creating the provider
-    const provider = new firebase.auth.GoogleAuthProvider()
-    let token = null
-    let user = null
-
-    // calling the sign in
-    await Auth.signInWithRedirect(provider)
-      .then(result => {
-        // This gives you a Google Access Token. You can use it to access the Google API
-        token = result.credential.accessToken
-        //The signed-in user info
-        user = result.user
-      })
-      .catch(err => {
-        throw err
-      })
-
-    return { user, token }
-  },
-  /**
-   * Calls the Sign Out method of Firebase Authh
-   * @return Promise<any> Returns the Promise of signOut Firebase method
-   */
-  signOut() {
-    return Auth.signOut()
-  },
-  /**
-   * If the session exists, returns the current user from Firebase
-   * @returns Object  The User object from Firebase
-   */
-  async getCurrentUser() {
-    let user = JSON.parse(localStorage.getItem('user'))
-
-    if (user) {
-      return user
-    }
-
-    return await Auth.currentUser
-  },
-  async fetchOrCreateUser(fireUser) {
-    // getting the user document by the ID
-    const userRef = db.collection('users').doc(fireUser.uid)
-    let user = null
-
-    await userRef
-      .get()
-      .then(readDoc => {
-        // if the user is found in the DB
-        if (readDoc.exists) {
-          user = readDoc.data()
-        }
-      })
-      .catch(err => {
-        throw err
-      })
-
-    if (!user) {
-      // if the user doesn't exists then create it
-      user = {
-        displayName: fireUser.displayName,
-        email: fireUser.email,
-        phoneNumber: fireUser.phoneNumber,
-        isAdmin: false,
-        contacts: [],
-        createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-        customMessage:
-          'URGENT! This is an emergency, my last location is <LOCATION>'
-      }
-
-      await userRef.set(user).then(() => {
-        console.log(`Document sucessfully witten.`)
-      })
-    }
-
-    return user
-  },
-  /**
-   * Store in DB the custom message to be used in SMS
-   * @param {*} uid ID of the User in DB
-   * @param {*} newMessage Message that we want to be used in SMS
-   */
-  updateCustomMessage(uid, newMessage) {
-    // getting the user document by the ID
-    const userRef = db.collection('users').doc(uid)
-
-    return userRef.update({ customMessage: newMessage })
-  },
-  /**
-   * This method takes an array of Contacts and replace the array of the object in DB
-   * @param {*} uid ID of the user in DB
-   * @param {*} contacts Array of contacts to replace the array in DB
-   */
-  updateContacts(uid, contacts) {
-    // getting the user document by ID
-    const userRef = db.collection('users').doc(uid)
-
-    return userRef.update({ contacts })
+  install: function(Vue) {
+    Vue.prototype.$auth = auth
   }
 }

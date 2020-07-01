@@ -2,17 +2,9 @@
 
 The coolest and easiest Vue App to track your current position and send it to your trusted contacts through SMS.
 
-Built with love using Firebase (Firestore and Firebase Hosting) and Nexmo for the SMS capabilities. You have to configure your own secrets for the google cloud functions, firestore and firebase hosting if you decide to deploy it there.
+Built with love using Firebase (Firestore and Firebase Hosting) and Vonage Communication API's for the SMS capabilities. You have to configure your own secrets for the google cloud functions, firestore and firebase hosting if you decide to deploy it there.
 
 Otherwise you may create the Docker image and run it where you are more confortable!
-
-## To Do:
-
-- Add flic button support (In progress)
-- User management enhancement for future features
-- Future features: Track your pet or your child (An interesting IOT Project)
-
-> _Take care of those you call your own and keep good company_ - Brian May. Good Company
 
 # The Vue side of things!
 
@@ -46,6 +38,20 @@ npm run test
 npm run lint
 ```
 
+# Configure Auth0
+
+Create an auth0 account at https://auth0.com and create an app. Then you need to set up your application, you may check the documentation for Auth0 + Vue https://auth0.com/docs/quickstart/spa/vuejs/01-login
+
+In the Settings tab of your application, you need to set the following values:
+
+- Allowed Callback URLs, for localhost set as http://localhost:8080/callback
+
+- Allowed Web Origins, for localhost set as http://localhost:8080
+
+- Allowed Logout URLs, for localhost set as http://localhost:8080/
+
+From the Settings tab of your application (in Auth0), copy the values of: `Domain` and `Client ID`. Go to `src\services\AuthService.js` Set the constants: `AUTH0_DOMAIN`, `CLIENT_ID`. Set the `URL` with your preferred domain for your app.
+
 # Configuring Firebase
 
 After you create your project in Firebase you need to enable authentication, aatabase, functions and optionally hosting.
@@ -55,12 +61,6 @@ After you create your project in Firebase you need to enable authentication, aat
 - In your project folder go to `Project Configuration` -> `General` tab -> `Add an app`, you'll be able to specify the name of the app and if you want to use Firebase Hosting.
 - Once created, search for `Firebase SDK snippet` and select the `Configuration` radio button
 - Copy the configuration and paste it in `./src/utils/firebase.js`
-
-### Authentication
-
-- Go to Authentication from the sidebar menu
-- Click on the `Access Methods`tab and enable `Google` (you can add as many providers as you wish but you will have to configure them separately)
-- Go to `Authorized Domains` and add the domain name you wish to use
 
 ### Database
 
@@ -94,11 +94,11 @@ firebase login
 
 ### Deploy the function in Firebase Cloud Functions
 
-The function for this app is in `./functions/nopanic/main.py`
+The function for this app is in `./functions/main.py`
 
-- Enter to the `./functions/nopanic/` directory
+- CD to the `./functions/` directory
 - Login in Gcloud with the CLI
-- Get the credentials from Nexmo, we need the Api Key, Api Secret and Nexmo Number. 
+- Get the credentials from Nexmo, we need the Api Key, Api Secret and Nexmo Number.
 - Then you need to deploy the function using
 
 ```

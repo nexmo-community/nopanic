@@ -1,12 +1,13 @@
 import AuthService from '@/services/AuthService'
+import UsersService from '@/services/UsersService'
 import { publishNotification } from '@/utils/storeHelpers.js'
 
 export const namespaced = true
 
 export const state = {
   user: JSON.parse(localStorage.getItem('user')) || {},
-  token: localStorage.getItem('token') || '',
-  isLogged: false,
+  token: localStorage.getItem('access_token') || '',
+  isLogged: localStorage.getItem('access_token') ? true : false,
   isAdmin: false,
   contacts: [],
   customMessage: ''
@@ -17,9 +18,6 @@ export const mutations = {
     state.isLogged = true
     state.user = user
     state.token = token
-    // set in local storage
-    localStorage.setItem('user', JSON.stringify(user))
-    localStorage.setItem('token', JSON.stringify(token))
   },
   SET_ADMIN_USER(state, isAdmin) {
     state.isAdmin = isAdmin
@@ -37,9 +35,6 @@ export const mutations = {
     state.isLogged = false
     state.user = {}
     state.token = ''
-    // remove from local storage
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
   }
 }
 
@@ -49,24 +44,28 @@ export const actions = {
    * @param {*} Vuex objects
    * @param {*} User Object with the User Info and Access Token from Firebase
    */
-  signInWithUserAndToken({ commit, dispatch }, { user, token }) {
+  signInWithUserAndToken({ commit }, { user, token }) {
     commit('SET_LOG_IN', { user, token })
-
-    // show notification
-    publishNotification('success', 'Signed In!', dispatch)
   },
   /**
    * Fetches the information of the User of sign in, if exists in DB, else creates it
    * @param {*} Vuex Objects
    */
-  async fetchOrCreateUser({ state, commit }) {
-    const user = await AuthService.fetchOrCreateUser(state.user)
+  async fetchOrCreateUser({ state, commit, dispatch }) {
+    // setting a flag in the state to indicate that the process of fetch of create user has
+    // been started
+    dispatch('setFetchingUser', true, { root: true })
+
+    // use the User service to fetch or create a new user
+    const user = await UsersService.fetchOrCreateUser(state.user)
 
     if (user) {
       // commit in the state the stored info in DB
       commit('SET_ADMIN_USER', user.isAdmin)
       commit('SET_CONTACTS', user.contacts)
       commit('SET_CUSTOM_MESSAGE', user.customMessage)
+      // set back the flag to false, to indicate that the process is done
+      dispatch('setFetchingUser', false, { root: true })
     }
   },
   /**
@@ -75,7 +74,7 @@ export const actions = {
    * @param {*} newMessage New Custom Message for SMS
    */
   updateCustomMessage({ state, commit, dispatch }, newMessage) {
-    AuthService.updateCustomMessage(state.user.uid, newMessage)
+    UsersService.updateCustomMessage(state.user.sub, newMessage)
       .then(() => {
         commit('SET_CUSTOM_MESSAGE', newMessage)
         // show notification
@@ -103,7 +102,7 @@ export const actions = {
     // getting the new array of contacts
     const contacts = [...state.contacts, ...[contact]]
 
-    AuthService.updateContacts(state.user.uid, contacts)
+    UsersService.updateContacts(state.user.sub, contacts)
       .then(() => {
         commit('ADD_CONTACT', contact)
         publishNotification(
@@ -129,7 +128,7 @@ export const actions = {
     // sorting
     contacts.sort((a, b) => (a.id > b.id ? 1 : b.id > a.id ? -1 : 0))
     // Updating
-    AuthService.updateContacts(state.user.uid, contacts)
+    UsersService.updateContacts(state.user.sub, contacts)
       .then(() => {
         commit('SET_CONTACTS', contacts)
         publishNotification(
@@ -155,7 +154,7 @@ export const actions = {
     // update the array of contacts, removing the one with id
     const contacts = state.contacts.filter(el => el.id !== id)
 
-    AuthService.updateContacts(state.user.uid, contacts)
+    UsersService.updateContacts(state.user.sub, contacts)
       .then(() => {
         commit('SET_CONTACTS', contacts)
         publishNotification('success', 'The contact was removed!', dispatch)
@@ -196,7 +195,8 @@ export const actions = {
    * @param {*} Vuex objects
    */
   singOut({ commit, dispatch }) {
-    AuthService.signOut()
+    this._vm.$auth
+      .logout()
       .then(() => {
         commit('LOGOUT')
       })

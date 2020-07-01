@@ -111,7 +111,6 @@ export default {
   mounted() {
     this.$store.dispatch('getCurrentLocation')
   },
-
   validations: {
     newMessage: { required, maxLength: maxLength(160) }
   },

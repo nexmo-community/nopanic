@@ -52,9 +52,8 @@
           color="#220886"
           medium
           round
-          >
-          Save
-        </v-btn>
+          >Save</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-dialog>

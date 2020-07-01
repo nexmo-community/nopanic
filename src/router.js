@@ -3,9 +3,8 @@ import Router from 'vue-router'
 import Dashboard from '@/views/Dashboard.vue'
 import Contacts from '@/views/Contacts.vue'
 import Users from '@/views/Users.vue'
-import SignIn from '@/views/SignIn.vue'
+import Callback from '@/views/Callback.vue'
 import ContactModalForm from '@/components/ContactModalForm.vue'
-import AuthService from '@/services/AuthService'
 
 Vue.use(Router)
 
@@ -14,48 +13,48 @@ const router = new Router({
   base: process.env.BASE_URL,
   routes: [
     {
+      path: '/callback',
+      name: 'auth-callback',
+      component: Callback
+    },
+    {
       path: '/',
       name: 'home',
       component: Dashboard,
       meta: {
-        requiresAuth: true,
-      },
+        requiresAuth: true
+      }
     },
     {
       path: '/contacts',
       name: 'contacts',
       component: Contacts,
       meta: {
-        requiresAuth: true,
+        requiresAuth: true
       },
       children: [
         {
           path: 'create',
           name: 'contact-create',
           component: ContactModalForm,
-          props: true,
+          props: true
         },
         {
           path: 'edit/:id',
           name: 'contact-edit',
           component: ContactModalForm,
-          props: true,
-        },
-      ],
+          props: true
+        }
+      ]
     },
     {
       path: '/users',
       name: 'users',
       component: Users,
       meta: {
-        requiresAuth: true,
-      },
-    },
-    {
-      path: '/signin',
-      name: 'signin',
-      component: SignIn,
-    },
+        requiresAuth: true
+      }
+    }
     // {
     //   path: "/about",
     //   name: "about",
@@ -65,25 +64,19 @@ const router = new Router({
     //   component: () =>
     //     import(/* webpackChunkName: "about" */ "./views/About.vue")
     // }
-  ],
+  ]
 })
 
 router.beforeEach(async (routeTo, routeFrom, next) => {
-  // get the current user
-  const currentUser = await AuthService.getCurrentUser()
-
-  const requiresAuth = routeTo.matched.some(
-    (record) => record.meta.requiresAuth
-  )
-
-  if (requiresAuth) {
-    if (currentUser) {
-      next()
-      return
-    }
-    next('signin')
-  } else {
+  if (routeTo.name == 'auth-callback') {
+    // check if "to"-route is "callback" and allow access
     next()
+  } else if (router.app.$auth.isAuthenticated()) {
+    next()
+  } else {
+    // trigger Auth0 login
+    router.app.$auth.login()
+    // next()
   }
 })
 

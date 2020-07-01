@@ -4,12 +4,16 @@ import App from '@/App.vue'
 import router from '@/router'
 import store from '@/store/store'
 import Vuelidate from 'vuelidate'
-import './registerServiceWorker'
+import auth from '@/services/AuthService'
+import '@/registerServiceWorker'
 import upperFirst from 'lodash/upperFirst'
 import camelCase from 'lodash/camelCase'
 
 // Setting up validations
 Vue.use(Vuelidate)
+
+// Setting up authentication with Auth0
+Vue.use(auth)
 
 /**
  * Automatic global register of components
