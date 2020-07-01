@@ -2,17 +2,10 @@
 
 The coolest and easiest Vue App to track your current position and send it to your trusted contacts through SMS.
 
-Built with love using Firebase (Firestore and Firebase Hosting) and Nexmo for the SMS capabilities. You have to configure your own secrets for the google cloud functions, firestore and firebase hosting if you decide to deploy it there.
+Built with love using Firebase (Firestore and Firebase Hosting) and Vonage Communication API's for the SMS capabilities. You have to configure your own secrets for the google cloud functions, firestore and firebase hosting if you decide to deploy it there.
 
 Otherwise you may create the Docker image and run it where you are more confortable!
 
-## To Do:
-
-- Add flic button support (In progress)
-- User management enhancement for future features
-- Future features: Track your pet or your child (An interesting IOT Project)
-
-> _Take care of those you call your own and keep good company_ - Brian May. Good Company
 
 # The Vue side of things!
 
@@ -94,9 +87,9 @@ firebase login
 
 ### Deploy the function in Firebase Cloud Functions
 
-The function for this app is in `./functions/nopanic/main.py`
+The function for this app is in `./functions/main.py`
 
-- Enter to the `./functions/nopanic/` directory
+- CD to the `./functions/` directory
 - Login in Gcloud with the CLI
 - Get the credentials from Nexmo, we need the Api Key, Api Secret and Nexmo Number. 
 - Then you need to deploy the function using
