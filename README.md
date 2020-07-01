@@ -1,14 +1,18 @@
-# No-Panic
+# No Panic
 
 The coolest and easiest Vue App to track your current position and send it to your trusted contacts through SMS.
 
-Built with love using Firebase, Google Maps, and Nexmo for the SMS capabilities.
+Built with love using Firebase (Firestore and Firebase Hosting) and Nexmo for the SMS capabilities. You have to configure your own secrets for the google cloud functions, firestore and firebase hosting if you decide to deploy it there.
+
+Otherwise you may create the Docker image and run it where you are more confortable!
 
 ## To Do:
 
 - Add flic button support (In progress)
 - User management enhancement for future features
 - Future features: Track your pet or your child (An interesting IOT Project)
+
+> _Take care of those you call your own and keep good company_ - Brian May. Good Company
 
 # The Vue side of things!
 
@@ -44,7 +48,7 @@ npm run lint
 
 # Configuring Firebase
 
-After you create your project in Firebase you need to enable authentication, database and optionally hosting.
+After you create your project in Firebase you need to enable authentication, aatabase, functions and optionally hosting.
 
 ## Adding your app to Firebase
 
@@ -61,6 +65,10 @@ After you create your project in Firebase you need to enable authentication, dat
 ### Database
 
 - Go to Database and click on start to use the service
+
+### Functions
+
+- You may do as with previous services to enable it or it will get enabled when using the Firebase CLI
 
 ### Hosting
 
@@ -83,6 +91,19 @@ firebase login
 ```
 
 ## Deployment
+
+### Deploy the function in Firebase Cloud Functions
+
+The function for this app is in `./functions/nopanic/main.py`
+
+- Enter to the `./functions/nopanic/` directory
+- Login in Gcloud with the CLI
+- Get the credentials from Nexmo, we need the Api Key, Api Secret and Nexmo Number. 
+- Then you need to deploy the function using
+
+```
+gcloud functions deploy send_sms --set-env-vars NEXMO_API_KEY='',NEXMO_API_SECRET='',NEXMO_NUMBER='' --runtime python37 --trigger-http --project [PROJECT_ID]
+```
 
 ### Deploy the application using Firebase hosting
 
@@ -123,7 +144,7 @@ There are a few things we need to set up before deploying our app to GKE. The cu
 
 ### Installing gcloud CLI
 
-In the documentation you can find how to install the CLI in other OS https://cloud.google.com/sdk/docs/quickstarts?hl=es-419 . Also make sure to have installed Python 2.7 or greater. Follow these commands to install the CLI
+In the documentation you can find how to install the CLI in other OS https://cloud.google.com/sdk/docs/quickstarts?hl=es-419 . Also make sure to have installed Python 2.7 or greater. Follow the next commands to install the CLI
 
 ```
 $ cd /opt

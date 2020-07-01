@@ -26,10 +26,10 @@
 </style>
 
 <script>
-import firebase from '@/utils/firebase'
-import store from '@/store/store'
-import { mapState } from 'vuex'
-import NotificationContainer from '@/components/NotificationContainer.vue'
+import firebase from "@/utils/firebase";
+import store from "@/store/store";
+import { mapState } from "vuex";
+import NotificationContainer from "@/components/NotificationContainer.vue";
 
 /**
  * Observer waiting for the user get obtained from Firebase SDK
@@ -38,26 +38,26 @@ import NotificationContainer from '@/components/NotificationContainer.vue'
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
     // if the user is obtained, then converting it to JSON
-    const jsonUser = user.toJSON()
+    const jsonUser = user.toJSON();
     // dispatching the log in
-    store.dispatch('user/signInWithUserAndToken', {
+    store.dispatch("user/signInWithUserAndToken", {
       user: jsonUser,
       token: jsonUser.stsTokenManager.accessToken
-    })
+    });
     // getting the user information from DB
-    store.dispatch('user/fetchOrCreateUser')
+    store.dispatch("user/fetchOrCreateUser");
   }
-})
+});
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     NotificationContainer
   },
   data() {
     return {
       updateLocation: null
-    }
+    };
   },
   computed: {
     ...mapState({
@@ -68,13 +68,13 @@ export default {
     isLogged: function(newVal) {
       // observing the changes in isLogged in order to
       // change of view, to home or sig in
-      console.log(`isLogged: ${newVal}`)
+      console.log(`isLogged: ${newVal}`);
       if (newVal) {
-        this.$router.push({ name: 'home' })
+        this.$router.push({ name: "home" });
       } else {
-        this.$router.push({ name: 'sigin' })
+        this.$router.push({ name: "signin" });
       }
     }
   }
-}
+};
 </script>

@@ -18,44 +18,44 @@ const router = new Router({
       name: 'home',
       component: Dashboard,
       meta: {
-        requiresAuth: true
-      }
+        requiresAuth: true,
+      },
     },
     {
       path: '/contacts',
       name: 'contacts',
       component: Contacts,
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
       },
       children: [
         {
           path: 'create',
           name: 'contact-create',
           component: ContactModalForm,
-          props: true
+          props: true,
         },
         {
           path: 'edit/:id',
           name: 'contact-edit',
           component: ContactModalForm,
-          props: true
-        }
-      ]
+          props: true,
+        },
+      ],
     },
     {
       path: '/users',
       name: 'users',
       component: Users,
       meta: {
-        requiresAuth: true
-      }
+        requiresAuth: true,
+      },
     },
     {
-      path: '/sigin',
-      name: 'sigin',
-      component: SignIn
-    }
+      path: '/signin',
+      name: 'signin',
+      component: SignIn,
+    },
     // {
     //   path: "/about",
     //   name: "about",
@@ -65,21 +65,23 @@ const router = new Router({
     //   component: () =>
     //     import(/* webpackChunkName: "about" */ "./views/About.vue")
     // }
-  ]
+  ],
 })
 
 router.beforeEach(async (routeTo, routeFrom, next) => {
   // get the current user
   const currentUser = await AuthService.getCurrentUser()
 
-  const requiresAuth = routeTo.matched.some(record => record.meta.requiresAuth)
+  const requiresAuth = routeTo.matched.some(
+    (record) => record.meta.requiresAuth
+  )
 
   if (requiresAuth) {
     if (currentUser) {
       next()
       return
     }
-    next('sigin')
+    next('signin')
   } else {
     next()
   }
