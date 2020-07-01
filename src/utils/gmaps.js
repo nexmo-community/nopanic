@@ -1,4 +1,4 @@
-const API_KEY = 'AIzaSyC-gKA70rg7KvOAIN5GVT5xykNbKfeLo-k'
+const API_KEY = 'YOUR API KEY'
 const CALLBACK_NAME = 'initMap'
 
 let initialized = !!window.google
