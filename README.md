@@ -39,6 +39,14 @@ npm run test
 npm run lint
 ```
 
+# Google MAPS API Key
+
+Create a new API Key of Google Maps to be able to consume the service, and copy the API Key. Then create a file `.env` in the root project directory, the content must be like
+
+```
+VUE_APP_MAPS_API_KEY="API_KEY"
+```
+
 # Configuring Firebase
 
 After you create your project in Firebase you need to enable authentication, aatabase, functions and optionally hosting.
