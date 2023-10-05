@@ -1,5 +1,7 @@
 # No Panic
 
+## ❗❗❗ **This repo is now deprecated. Check the [Vonage Developer Blog](https://developer.vonage.com/en/blog) for more blog posts and tutorials. For more sample Vonage projects, check the [Vonage Community GitHub repo](https://github.com/Vonage-Community).**
+
 The coolest and easiest Vue App to track your current position and send it to your trusted contacts through SMS.
 
 Built with love using Firebase (Firestore and Firebase Hosting) and Vonage Communication API's for the SMS capabilities. You have to configure your own secrets for the google cloud functions, firestore and firebase hosting if you decide to deploy it there.
